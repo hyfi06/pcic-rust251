@@ -1,8 +1,8 @@
 fn main() {
-    let n: i32 = 10;
-    println!("{}", duplica(n as i64));
+    let n = 10.5f64;
+    println!("{}", duplica(n));
 }
 
-fn duplica(x: i64) -> i64 {
+fn duplica<T: std::ops::Add<Output = T> + Copy>(x: T) -> T {
     return x + x;
 }

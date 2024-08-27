@@ -1,6 +1,16 @@
 use std::ops::Deref;
 
-fn main() {}
+fn main() {
+    let p: Point = Point { x: 0.0, y: 4.0 };
+    let q: Point = Point { x: 3.0, y: 0.0 };
+    println!("{}", distance(&p, &q));
+    let a: ColoredPoint = ColoredPoint {
+        point: p,
+        color: 1,
+        temp: Some(37.5),
+    };
+    println!("x:{} y:{} t:{:?}", a.point.x, a.point.y, a.temp);
+}
 
 fn distance(p: &Point, q: &Point) -> f64 {
     p.distance(q)
@@ -52,10 +62,12 @@ mod test {
         let p = ColoredPoint {
             point: Point { x: 0.0, y: 4.0 },
             color: 1,
+            temp: None,
         };
         let q = ColoredPoint {
             point: Point { x: 3.0, y: 0.0 },
             color: 2,
+            temp: None,
         };
         assert_eq!(distance(&p, &q), 5.0);
     }
@@ -65,6 +77,7 @@ mod test {
         let p = ColoredPoint {
             point: Point { x: 0.0, y: 4.0 },
             color: 1,
+            temp:None
         };
         let n: &u32 = p.as_ref();
         println!("Color: {}", n);

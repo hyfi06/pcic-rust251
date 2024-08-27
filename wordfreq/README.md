@@ -1,3 +1,56 @@
+# Tarea 1
+
+## Práctica de cadenas y colecciones
+
+```rust
+use std::collections::HashMap;
+use std::env;
+use std::fs;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let file_path = parse_args(&args);
+    let text = open_file(file_path);
+    let frequencies = word_count(&text);
+    for ( &word,freq) in &frequencies {
+        println!("{word}: {freq}");
+    }
+}
+
+fn parse_args(args: &Vec<String>) -> &str {
+    if args.len() < 2 {
+        panic!("Not enough arguments");
+    }
+    &args[1]
+}
+
+fn open_file(path: &str) -> String {
+    fs::read_to_string(path).expect("Should have been able to read the file")
+}
+
+fn word_count(text: &str) -> HashMap<&str, u32> {
+    let mut map: HashMap<&str, u32> = HashMap::new();
+    for word in text.split_whitespace() {
+        let count = map.entry(word).or_insert(0);
+        *count += 1;
+    }
+    map
+}
+```
+
+## Práctica de algoritmos y generics
+
+```rust
+fn mysort<T: Ord + Clone>(arr: &[T]) -> Vec<T> {
+    let mut vec = arr.to_vec();
+    vec.sort_by(|a, b| a.cmp(b));
+    vec
+}
+```
+
+## Aplicación de tu función
+
+```rust 
 use std::collections::HashMap;
 use std::env;
 use std::fs;
@@ -46,23 +99,4 @@ fn my_sort<T: Ord>(arr: &[T]) -> Vec<usize> {
     idxs
 }
 
-fn mysort<T: Ord + Clone>(arr: &[T]) -> Vec<T> {
-    let mut vec = arr.to_vec();
-    vec.sort_by(|a, b| a.cmp(b));
-    vec
-}
-
-
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_sort() {
-        let vec = vec![5, 7, 2, 6, 1, 4];
-        let ordered_vec = mysort(&vec);
-        dbg!(&ordered_vec);
-        assert_eq!(ordered_vec, vec![1, 2, 4, 5, 6, 7]);
-    }
-}
+```

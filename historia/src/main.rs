@@ -5,6 +5,12 @@ const FILENAME: &str = "history.csv";
 
 // Tipo, TAG, TEXTO, VIDA
 #[derive(Debug)]
+
+enum Tipo {
+    SITUACION,
+    OPCION,
+    ERORR,
+}
 struct DatoHistoria {
     tipo_dato: String,
     tag: String,

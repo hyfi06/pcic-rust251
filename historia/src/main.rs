@@ -2,20 +2,17 @@ use csv::{ReaderBuilder, StringRecord};
 use std::{collections::HashMap, fs};
 
 const FILENAME: &str = "history.csv";
+const FIRST_TAG: &str = "INICIO";
 
 // Tipo, TAG, TEXTO, VIDA
 #[derive(Debug)]
 
-enum Tipo {
-    SITUACION,
-    OPCION,
-    ERORR,
-}
 struct DatoHistoria {
     tipo_dato: String,
     tag: String,
     texto: String,
     vida: i32,
+    opciones: Vec<DatoHistoria>,
 }
 
 impl From<StringRecord> for DatoHistoria {
@@ -26,21 +23,58 @@ impl From<StringRecord> for DatoHistoria {
             tag: iter.next().unwrap().trim().to_string(),
             texto: iter.next().unwrap().trim().to_string(),
             vida: iter.next().unwrap().trim().parse().unwrap_or(0),
+            opciones: Vec::new(),
         }
     }
 }
 
 fn main() {
-    let content = fs::read_to_string(FILENAME).unwrap();
+    let mut vida = 100;
+    let mut tag_actual = FIRST_TAG;
+    let mut last_record: String = "".to_string();
 
+    let mut datos_historia = HashMap::new();
+
+    let content = fs::read_to_string(FILENAME).unwrap();
     let mut rdr = ReaderBuilder::new()
         .delimiter(b';')
         .from_reader(content.as_bytes());
 
-    let mut datos_historia = HashMap::new();
     for record in rdr.records() {
         let data = DatoHistoria::from(record.unwrap());
-        datos_historia.insert(data.tag.clone(), data);
+        if data.tipo_dato == "SITUACION" {
+            last_record = data.tag.clone();
+            datos_historia.insert(last_record.clone(), data);
+        } else {
+            if let Some(situation) = datos_historia.get_mut(&last_record) {
+                (*situation).opciones.push(data);
+            }
+        }
     }
-    println!("{:?}", datos_historia);
+
+    // Game Loop
+    loop {
+        let data = datos_historia.get(tag_actual).unwrap();
+        vida += data.vida;
+        println!("Tienes {} de vida", vida);
+        println!("{}", data.texto);
+
+        if vida <= 0 {
+            println!("Game over");
+            break;
+        }
+
+        for (idx, option) in data.opciones.iter().enumerate() {
+            println!("[{}] {}", idx, option.texto);
+        }
+        let mut selection = String::new();
+        std::io::stdin().read_line(&mut selection).unwrap();
+        let selection: usize = selection.trim().parse().unwrap_or(99);
+        if let Some(eleccion) = data.opciones.get(selection) {
+            tag_actual = &eleccion.tag;
+        } else {
+            println!("Comando no válido");
+        }
+        println!("");
+    }
 }

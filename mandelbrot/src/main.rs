@@ -8,8 +8,8 @@ use std::{
 
 use complex::*;
 
-const HIGHT: i32 = 100;
-const WIDTH: i32 = 100;
+const HIGHT: i32 = 10000;
+const WIDTH: i32 = 10000;
 const X_MAX: f64 = 2.0;
 const X_MIN: f64 = -2.0;
 const Y_MAX: f64 = 2.0;
@@ -17,10 +17,10 @@ const Y_MIN: f64 = -2.0;
 
 fn main() {
     let num_cpu = std::thread::available_parallelism().unwrap();
-    println!("Iniciamos el cálculo con {} hilos.", num_cpu);
     let results: Arc<Mutex<Vec<(i32, Vec<u8>)>>> = Arc::new(Mutex::new(Vec::new()));
     let rows = Arc::new(Mutex::new((0..HIGHT).into_iter()));
-
+    
+    println!("Iniciamos el cálculo con {} hilos.", num_cpu);
     let mut handles = vec![];
     for _ in 0..num_cpu.into() {
         let results = Arc::clone(&results);
@@ -48,12 +48,18 @@ fn main() {
             acc.extend(row);
             acc
         });
-        save_image(WIDTH, HIGHT, &image, &format!("mandelbrot_{WIDTH}_{HIGHT}.pgm")).unwrap();
+    save_image(
+        WIDTH,
+        HIGHT,
+        &image,
+        &format!("mandelbrot_{WIDTH}_{HIGHT}.pgm"),
+    )
+    .unwrap();
 }
 
 fn pixel_to_coord(row: i32, col: i32) -> Complex<f64> {
-    let dx: f64 = (X_MAX - X_MIN + 1.0) / f64::from(WIDTH);
-    let dy: f64 = (Y_MAX - Y_MIN + 1.0) / f64::from(HIGHT);
+    let dx: f64 = (X_MAX - X_MIN) / (f64::from(WIDTH) - 1.0);
+    let dy: f64 = (Y_MAX - Y_MIN) / (f64::from(HIGHT) - 1.0);
     let re = X_MIN + dx * f64::from(col);
     let im = Y_MAX - dy * f64::from(row);
     Complex::new(re, im)
@@ -82,4 +88,20 @@ fn save_image(width: i32, height: i32, data: &[u8], filename: &str) -> std::io::
     file.write_all(data)?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn limits() {
+        let ul = pixel_to_coord(0, 0);
+        let dl = pixel_to_coord(HIGHT - 1, 0);
+        let ur = pixel_to_coord(0, WIDTH - 1);
+        let dr = pixel_to_coord(HIGHT - 1, WIDTH - 1);
+        assert_eq!(Complex::new(X_MIN, Y_MAX),ul);
+        assert_eq!(Complex::new(X_MIN, Y_MIN),dl);
+        assert_eq!(Complex::new(X_MAX, Y_MAX),ur);
+        assert_eq!(Complex::new(X_MAX, Y_MIN),dr);
+    }
 }

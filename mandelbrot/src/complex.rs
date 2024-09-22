@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(Clone, Copy)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct Complex<T> {
     re: T,
     im: T,

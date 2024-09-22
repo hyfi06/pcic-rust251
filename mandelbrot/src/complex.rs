@@ -12,12 +12,6 @@ impl<T> Complex<T> {
     }
 }
 
-impl Complex<f64> {
-    pub fn norm64(&self) -> f64 {
-        (self.re.powi(2) + self.im.powi(2)).powf(0.5)
-    }
-}
-
 impl<T: ops::Add<Output = T>> ops::Add for Complex<T> {
     type Output = Complex<T>;
 
@@ -37,5 +31,11 @@ where
             self.re * rhs.re - self.im * rhs.im,
             self.re * rhs.im + self.im * rhs.re,
         )
+    }
+}
+
+impl<T: ops::Add<Output = T> + ops::Mul<Output = T> + Copy> Complex<T> {
+    pub fn norm_sqrt_f64(&self) -> T {
+        self.re * self.re + self.im * self.im
     }
 }

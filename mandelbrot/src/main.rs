@@ -8,18 +8,18 @@ use std::{
 
 use complex::*;
 
-const HIGHT: i32 = 10000;
-const WIDTH: i32 = 10000;
-const X_MAX: f64 = 2.0;
+const HIGHT: i32 = 20000;
+const WIDTH: i32 = 20000;
+const X_MAX: f64 = 1.5;
 const X_MIN: f64 = -2.0;
-const Y_MAX: f64 = 2.0;
-const Y_MIN: f64 = -2.0;
+const Y_MAX: f64 = 1.75;
+const Y_MIN: f64 = -1.75;
 
 fn main() {
     let num_cpu = std::thread::available_parallelism().unwrap();
     let results: Arc<Mutex<Vec<(i32, Vec<u8>)>>> = Arc::new(Mutex::new(Vec::new()));
     let rows = Arc::new(Mutex::new((0..HIGHT).into_iter()));
-    
+
     println!("Iniciamos el cálculo con {} hilos.", num_cpu);
     let mut handles = vec![];
     for _ in 0..num_cpu.into() {
@@ -68,7 +68,7 @@ fn pixel_to_coord(row: i32, col: i32) -> Complex<f64> {
 fn color_coord(c: Complex<f64>) -> u8 {
     let mut count: u8 = 0;
     let mut z: Complex<f64> = Complex::new(0f64, 0f64);
-    while z.norm64() < 4.0 && count < u8::MAX {
+    while z.norm_sqrt_f64() < 4.0 && count < u8::MAX {
         z = z * z + c;
         count += 1;
     }
@@ -76,17 +76,13 @@ fn color_coord(c: Complex<f64>) -> u8 {
 }
 
 fn save_image(width: i32, height: i32, data: &[u8], filename: &str) -> std::io::Result<()> {
-    // Abre el archivo para escribir
     let mut file = File::create(filename)?;
-
     // Escribe el encabezado del archivo PGM
-    writeln!(file, "P5")?; // El formato "P5" indica una imagen binaria en escala de grises
-    writeln!(file, "{} {}", width, height)?; // Ancho y alto de la imagen
-    writeln!(file, "255")?; // El valor máximo de intensidad de gris (0-255)
-
+    writeln!(file, "P5")?;
+    writeln!(file, "{} {}", width, height)?;
+    writeln!(file, "255")?;
     // Escribe los datos de la imagen
     file.write_all(data)?;
-
     Ok(())
 }
 
@@ -99,9 +95,9 @@ mod test {
         let dl = pixel_to_coord(HIGHT - 1, 0);
         let ur = pixel_to_coord(0, WIDTH - 1);
         let dr = pixel_to_coord(HIGHT - 1, WIDTH - 1);
-        assert_eq!(Complex::new(X_MIN, Y_MAX),ul);
-        assert_eq!(Complex::new(X_MIN, Y_MIN),dl);
-        assert_eq!(Complex::new(X_MAX, Y_MAX),ur);
-        assert_eq!(Complex::new(X_MAX, Y_MIN),dr);
+        assert_eq!(Complex::new(X_MIN, Y_MAX), ul);
+        assert_eq!(Complex::new(X_MIN, Y_MIN), dl);
+        assert_eq!(Complex::new(X_MAX, Y_MAX), ur);
+        assert_eq!(Complex::new(X_MAX, Y_MIN), dr);
     }
 }
